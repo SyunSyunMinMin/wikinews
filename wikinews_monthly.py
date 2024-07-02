@@ -203,9 +203,9 @@ async def editpage(pagename, content):
 	Data = Result.json()
 
 	Token = Data['query']['tokens']['csrftoken']
-	print(Token)
-	R = S.post(URL, data={
+	Result = S.post(URL, data={
 		"action": "edit",
+		"assert": "user",
 		"format": "json",
 		"formatversion": "2",
 		"title": pagename,
@@ -213,6 +213,8 @@ async def editpage(pagename, content):
 		"text": content,
 		"summary": '月次更新'
 	})
+	EditData = Result.json()
+	assert EditData["edit"]["result"] == 'Success', '編集に失敗しました'
 	time.sleep(5)
 try:
     loop = asyncio.get_running_loop()
