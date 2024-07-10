@@ -185,7 +185,7 @@ async def create_tanshin_page(year, month, day):
 	content = '{{短信}}{{短信ヘッダ|' + str(year) + '|' + str(month) + '|' + str(day) + '}}\n<onlyinclude>\n<!--↓短信フォーマット↓\n*（政治/経済/社会/文化/スポーツ/学術/ひと/気象/脇ニュース）短信本文 - [http://（出典URL） 発行者]\n-->\n</onlyinclude>\n{{短信フッタ|' + str(year) + '|' + str(month) + '|' + str(day) + '}}'
 	await editpage(pagename, content)
 
-async def editpage(pagename, content):
+async def editpage(pagename, content, botflag = True):
 	Result = S.get(url=URL, params={
 		"action": "query",
 		"format": "json",
@@ -198,6 +198,7 @@ async def editpage(pagename, content):
 	Result = S.post(URL, data={
 		"action": "edit",
 		"assert": "user",
+		"bot": botflag,
 		"format": "json",
 		"formatversion": "2",
 		"title": pagename,
