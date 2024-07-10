@@ -9,8 +9,9 @@ import time
 cur_time = datetime.datetime.now()
 S = requests.Session()
 URL = "https://ja.wikinews.org/w/api.php"
+DATA_PATH = './wikinews/data/wikinews_update.json'
 
-with open('data/wikinews_update.json') as f:
+with open(DATA_PATH) as f:
 	Lastdata = json.load(f)
 last_date = Lastdata["created"]
 last_year = last_date["year"]
@@ -19,10 +20,10 @@ update_time = datetime.datetime(last_year, last_month, 1)
 
 async def init():
 	if ((update_time - cur_time) < datetime.timedelta(days=60)):
-		print('更新します')
+		print('現在時刻: ' + cur_time.strftime('%Y年%m月%d日') + ' - 最終更新: ' + update_time.strftime('%Y年%m月') + ' - 更新します')
 		await login()
 		await monthly_update()
-	print('更新の必要なし')
+	print('現在時刻: ' + cur_time.strftime('%Y年%m月%d日') + ' - 最終更新: ' + update_time.strftime('%Y年%m月') + ' - 更新の必要はありません')
 
 async def login():
 	Result = S.get(url=URL, params={
@@ -44,7 +45,6 @@ async def login():
 	})
 
 async def monthly_update():
-	print('更新実行')
 	year = last_year
 	month = last_month
 	for i in range(4):
@@ -55,16 +55,13 @@ async def monthly_update():
 		else:
 			month += 1
 		await monthly(year, month)
-	print(year)
-	print(month)
 	Newdata = Lastdata
 	Newdata["created"]["year"] = year
 	Newdata["created"]["month"] = month
-	with open('data/wikinews_update.json', 'w') as f:
+	with open(DATA_PATH, 'w') as f:
 		json.dump(Newdata, f, indent=2)
 
 async def annual(year):
-	print(year)
 	await annual_main_page(year)
 	await annual_cat_page(year)
 	await annual_tanshin_page(year)
@@ -117,9 +114,6 @@ async def monthly(year, month):
 	numOfDays = calen[1]
 	youbi = ['月', '火', '水', '木', '金', '土', '日']
 	dayOfWeek = youbi[dayOfWeek]
-	print(dayOfWeek)
-	print(numOfDays)
-	print(calen)
 	await create_month_main_page(year, month, generateTemplate(year, month, dayOfWeek, numOfDays, False))
 	await create_month_tanshin_page(year, month, generateTemplate(year, month, dayOfWeek, numOfDays, True))
 	await create_month_cat_page(year, month)
@@ -192,8 +186,6 @@ async def create_tanshin_page(year, month, day):
 	await editpage(pagename, content)
 
 async def editpage(pagename, content):
-	#print(pagename)
-	#print(content)
 	Result = S.get(url=URL, params={
 		"action": "query",
 		"format": "json",
@@ -215,7 +207,7 @@ async def editpage(pagename, content):
 	})
 	EditData = Result.json()
 	assert EditData["edit"]["result"] == 'Success', '編集に失敗しました'
-	time.sleep(5)
+	await asyncio.sleep(5)
 try:
     loop = asyncio.get_running_loop()
 except RuntimeError:
