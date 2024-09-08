@@ -177,7 +177,7 @@ async def create_day_page(year, month, day):
 
 async def create_cat_page(year, month, day):
 	pagename = f'カテゴリ:{year}年{month}月{day}日'
-	content = '{{カテゴリ日付|' + str(year) + str(month) + str(day) + '}}'
+	content = '{{カテゴリ日付|' + str(year) + str(month).zfill(2) + str(day).zfill(2) + '}}'
 	await editpage(pagename, content)
 
 async def create_tanshin_page(year, month, day):
